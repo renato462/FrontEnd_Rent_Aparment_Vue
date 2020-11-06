@@ -69,8 +69,8 @@ export default {
           active:false,
           items: [
             { title: "Propiedades", icon:"mdi-city", to: "/properties" },
-            { title: "New American", icon:"", to: "" },
-            { title: "Sushi", icon:"", to: "" },
+            { title: "Departamentos", icon:"mdi-home", to: "/aparments" },
+            { title: "Prueba", icon:"", to: "/prueba" },
           ],
         },
       ],

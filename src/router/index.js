@@ -2,6 +2,8 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Login from "../views/Login.vue";
 import Properties from "../components/Properties.vue";
+import Aparments from "../components/Aparments.vue";
+import Prueba from "../components/Prueba.vue";
 import Error from "../views/Error.vue";
 import store from "../store/index";
 
@@ -26,6 +28,21 @@ const routes = [
       requiresAuth: true,
     },
   },
+  {
+    path: "/aparments",
+    name: "Aparment",
+    component: Aparments,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: "/prueba",
+    name: "Prueba",
+    component: Prueba,
+    
+  },
+
   { path: '*', component: Error }
   // {
   //   path: '/property/new',

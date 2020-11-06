@@ -155,6 +155,7 @@
                             label="Password"
                             name="Password"
                             prepend-icon="lock"
+                            type="password"
                             color="teal accent-3"
                             v-model="user.password"
                             :error-messages="errorsMsgPassword"
@@ -254,7 +255,7 @@ export default {
   methods: {
     login() {
       const api = "login";
-      console.log(this.user);
+   
       Vue.axios
         .post(api, this.user)
         .then((response) => {

@@ -275,6 +275,7 @@ export default {
     save() {
       if (this.editedIndex > -1) {
         const api = "property/" + this.editedItem._id;
+        console.log(this.config);
         Vue.axios
           .put(api, { ...this.editedItem },this.config)
           .then((response) => {

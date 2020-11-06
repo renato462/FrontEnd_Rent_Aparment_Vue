@@ -13,7 +13,7 @@
         <router-view></router-view>
       </v-container>
     </v-main>
-    <Footer v-if="!viewLogin" />
+    <!-- <Footer v-if="!viewLogin" /> -->
   </v-app>
 </template>
  
