@@ -50,30 +50,61 @@
                     <v-row>
                       <v-col cols="12" sm="12" md="12">
                         <v-text-field
-                          v-model="editedItem.code"
-                          :rules="editedItemRules.code"
-                          label="Codigo"
+                          v-model="editedItem.clientName"
+                          :rules="editedItemRules.clientName"
+                          label="Nombre o Razón Social "
                           required
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="12" md="12">
+                        <v-col cols="6" sm="12" md="6">
+                        <v-autocomplete
+                          v-model="editedItem.typeDocument"
+                          :items="typeDocument"
+                          item-text="typeDocument"
+                          item-value="id"
+                          :rules="editedItemRules.typeDocument"
+                          label="Tipos de Documento"
+                          required
+                          return-object
+                        ></v-autocomplete>
+                      </v-col>
+                      <v-col cols="6" sm="12" md="6">
                         <v-text-field
-                          v-model="editedItem.floor"
-                          :rules="editedItemRules.floor"
-                          label="Piso"
+                          v-model="editedItem.numberDocument"
+                          :rules="editedItemRules.numberDocument"
+                          label="Numero de Documento"
                           required
                         ></v-text-field>
                       </v-col>
+                  
+
                       <v-col cols="12" sm="12" md="12">
                         <v-text-field
-                          v-model="editedItem.price"
-                          :rules="editedItemRules.price"
-                          label="Precio"
+                          v-model="editedItem.adress"
+                          :rules="editedItemRules.adress"
+                          label="Dirección"
                           required
                         ></v-text-field>
                       </v-col>
 
                       <v-col cols="12" sm="12" md="12">
+                        <v-text-field
+                          v-model="editedItem.phone"
+                          :rules="editedItemRules.phone"
+                          label="Telefono "
+                          required
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="12" md="12">
+                        <v-text-field
+                          v-model="editedItem.email"
+                          :rules="editedItemRules.email"
+                          label="Correo"
+                          required
+                        ></v-text-field>
+                      </v-col>
+
+                      <!-- <v-col cols="12" sm="12" md="12">
                         <v-autocomplete
                           v-model="editedItem.propertyId"
                           :items="properties"
@@ -84,7 +115,7 @@
                           required
                           return-object
                         ></v-autocomplete>
-                      </v-col>
+                      </v-col> -->
                     </v-row>
                   </v-container>
                 </v-card-text>
@@ -135,9 +166,7 @@
         <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
       </template>
 
-      <template v-slot:no-data>
-        
-      </template>
+      <template v-slot:no-data> </template>
     </v-data-table>
 
     <div class="text-center pt-2">
@@ -167,8 +196,8 @@ export default {
   data: () => ({
     loading: true,
     valid: true,
-    title1: "Departamentos",
-    title2: "Departamento",
+    title1: "Clientes",
+    title2: "Cliente",
     search: "",
     dialog: false,
     dialogDelete: false,
@@ -179,39 +208,48 @@ export default {
     itemsPerPage: 10,
     headers: [
       { text: "N", value: "index" },
-      { text: "Codigo ", value: "code" },
-      { text: "Piso ", value: "floor" },
-      { text: "Precio", value: "price" },
-      { text: "Propiedad", value: "propertyId.adressNickname" },
+      { text: "Nombre o Razón Social ", value: "clientName" },
+      { text: "Tipo de Documento ", value: "typeDocument" },
+      { text: "Numero de Documento", value: "numberDocument" },
+      { text: "Dirección", value: "adress" },
+      { text: "Telefono", value: "phone" },
+      { text: "Correo", value: "email" },
       { text: "Creado", value: "createdAt" },
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    properties: [],
     items: [],
+    clients: [],
+    typeDocument:["DNI", "RUC", "OTROS"],
     editedIndex: -1,
     editedItem: {
-      code: "",
-      floor: "",
-      price: "",
-      propertyId: "",
+      clientName: "",
+      typeDocument: "",
+      numberDocument: "",
+      adress: "",
+      phone: "",
+      email: "",
     },
     editedItemRules: {
-      code: [(v) => !!v || "Codido es requerido"],
-      floor: [(v) => !!v || "Piso es requerido"],
-      price: [(v) => !!v || "Precio es requerido"],
-      propertyId: [(v) => !!v || "Propiedad es requerido"],
+      clientName: [(v) => !!v || "Campo requerido"],
+      typeDocument: [(v) => !!v || "Campo requerido"],
+      numberDocument: [(v) => !!v || "Campo requerido"],
+      adress: [(v) => !!v || "Campo requerido"],
+      phone: [(v) => !!v || "Campo requerido"],
+      email: [(v) => !!v || "Campo requerido", v => /.+@.+\..+/.test(v) || 'Campo debe ser un email valido',],
     },
     defaultItem: {
-      code: "",
-      floor: "",
-      price: "",
-      propertyId: "",
+      clientName: "",
+      typeDocument: "",
+      numberDocument: "",
+      adress: "",
+      phone: "",
+      email: "",
     },
     path: {
-      getAll: "aparments",
-      create: "aparment",
-      update: "aparment/",
-      delete: "aparment/",
+      getAll: "clients",
+      create: "client",
+      update: "client/",
+      delete: "client/",
     },
     config: "",
   }),
@@ -240,7 +278,6 @@ export default {
   created() {
     this.headerRequests();
     this.getItems();
-    this.getProperties();
   },
 
   methods: {
@@ -253,19 +290,6 @@ export default {
       this.config = { headers: { "x-token": this.$store.state.token } };
     },
 
-    getProperties() {
-      const api = "properties";
-      let propertiesArray;
-      Vue.axios
-        .get(api, this.config)
-        .then((response) => {
-          this.properties = response.data.properties;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-
     getItems() {
       const api = this.path.getAll + "?page=" + this.page;
       this.loading = true;
@@ -276,9 +300,9 @@ export default {
           this.loading = false;
 
           // Se debe cambiar en cada iteración
-          this.items = response.data.aparments;
+          this.items = response.data.clients;
           this.pageNumber = +Math.ceil(
-            response.data.aparmentTotal / this.itemsPerPage
+            response.data.clientTotal / this.itemsPerPage
           );
 
           // Agregar Index para la Tabla

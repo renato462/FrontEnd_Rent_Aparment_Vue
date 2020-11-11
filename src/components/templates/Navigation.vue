@@ -70,7 +70,7 @@ export default {
           items: [
             { title: "Propiedades", icon:"mdi-city", to: "/properties" },
             { title: "Departamentos", icon:"mdi-home", to: "/aparments" },
-            { title: "Prueba", icon:"", to: "/prueba" },
+            { title: "Clientes", icon:"person_add", to: "/clients" },
           ],
         },
       ],

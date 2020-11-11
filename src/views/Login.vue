@@ -54,6 +54,9 @@
                         </v-form>
                         <h3 class="text-center mt-3">Olvido su password ?</h3>
                       </v-card-text>
+                          <p v-if="hasErrorLogin" class="red--text text-center">
+                            (*) El email o password se encuentran equivocados
+                          </p>
                       <div class="text-center mb-3">
                         <v-btn
                           rounded
@@ -212,6 +215,7 @@ export default {
       password: "",
     },
     hasError: false,
+    hasErrorLogin: false,
   }),
   props: {
     source: String,
@@ -266,7 +270,12 @@ export default {
           this.$router.push("/properties");
         })
         .catch((error) => {
-          console.log(error);
+         
+          if (error.response.data.msg) {
+            this.hasErrorLogin = true;
+          } else {
+            this.hasErrorLogin = false;
+          }
         });
     },
     register() {
@@ -282,6 +291,7 @@ export default {
           this.$router.push("/properties");
         })
         .catch((error) => {
+         
           if (error.response.data.msg) {
             this.hasError = true;
           } else {
