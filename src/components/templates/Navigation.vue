@@ -71,6 +71,7 @@ export default {
             { title: "Propiedades", icon:"mdi-city", to: "/properties" },
             { title: "Departamentos", icon:"mdi-home", to: "/aparments" },
             { title: "Clientes", icon:"person_add", to: "/clients" },
+            { title: "Prueba", icon:"error", to: "/prueba" },
           ],
         },
       ],

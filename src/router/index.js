@@ -43,6 +43,12 @@ const routes = [
     component: Clients,
     
   },
+  {
+    path: "/prueba",
+    name: "Prueba",
+    component: Prueba,
+    
+  },
 
   { path: '*', component: Error }
   // {

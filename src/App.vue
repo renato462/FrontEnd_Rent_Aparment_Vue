@@ -11,6 +11,7 @@
       <v-container fluid>
         <!-- If using vue-router -->
         <router-view></router-view>
+       
       </v-container>
     </v-main>
     <!-- <Footer v-if="!viewLogin" /> -->
@@ -25,6 +26,7 @@ import Footer from "./components/templates/Footer.vue";
 import HelloWorld from "./components/HelloWorld.vue";
 import Login from "./views/Login.vue";
 
+
 export default {
   name: "App",
   components: {
@@ -33,20 +35,19 @@ export default {
     HelloWorld,
     Footer,
     Login,
+    
   },
   data: () => ({
     data: false,
   }),
   computed: {
     viewLogin() {
-      return this.$route.path == "/login";   
+      return this.$route.path == "/login";
     },
   },
   created() {
     this.$store.dispatch("autoLogin");
   },
-  methods: {
-   
-  },
+  methods: {},
 };
 </script>

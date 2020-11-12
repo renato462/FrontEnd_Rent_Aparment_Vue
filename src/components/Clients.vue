@@ -56,7 +56,7 @@
                           required
                         ></v-text-field>
                       </v-col>
-                        <v-col cols="6" sm="12" md="6">
+                      <v-col cols="6" sm="12" md="6">
                         <v-autocomplete
                           v-model="editedItem.typeDocument"
                           :items="typeDocument"
@@ -68,6 +68,7 @@
                           return-object
                         ></v-autocomplete>
                       </v-col>
+
                       <v-col cols="6" sm="12" md="6">
                         <v-text-field
                           v-model="editedItem.numberDocument"
@@ -76,7 +77,6 @@
                           required
                         ></v-text-field>
                       </v-col>
-                  
 
                       <v-col cols="12" sm="12" md="12">
                         <v-text-field
@@ -86,6 +86,50 @@
                           required
                         ></v-text-field>
                       </v-col>
+
+                      <v-col cols="3" sm="12" md="12">
+                        <v-autocomplete
+                          v-model="editedItem.region"
+                          :items="itemsRegions"
+                          item-text="name"
+                          item-value="code"
+                          :rules="editedItemRules.region"
+                          label="Región"
+                          required
+                          return-object
+                          @change="provinces(editedItem.region)"
+                        ></v-autocomplete>
+                      </v-col>
+                      {{ editedItem.region }}
+                    
+                      <v-col cols="3" sm="12" md="12">
+                        <v-autocomplete
+                          v-model="editedItem.provincie"
+                          :rules="editedItemRules.provincie"
+                          :items="itemsProvinces"
+                          item-text="name"
+                          item-value="code"
+                          label="Provincia"
+                          @change="districts(editedItem.provincie)"
+                          return-object
+                          required
+                        ></v-autocomplete>
+                      </v-col>
+                      {{ editedItem.provincie }}
+
+                      <v-col cols="3" sm="12" md="12">
+                        <v-autocomplete
+                          v-model="editedItem.district"
+                          :rules="editedItemRules.district"
+                          :items="itemsDistricts"
+                          item-text="name"
+                          item-value="code"
+                          label="Distrito"
+                          return-object
+                          required
+                        ></v-autocomplete>
+                      </v-col>
+                      {{ editedItem.district }}
 
                       <v-col cols="12" sm="12" md="12">
                         <v-text-field
@@ -157,8 +201,8 @@
         </v-toolbar>
       </template>
 
-      <template v-slot:item.createdAt="{ item }">
-        <span>{{ new Date(item.createdAt).toLocaleDateString() }}</span>
+      <template v-slot:item.updatedAt="{ item }">
+        <span>{{ new Date(item.updatedAt).toLocaleDateString() }}</span>
       </template>
 
       <template v-slot:item.actions="{ item }">
@@ -180,19 +224,18 @@
 </template>
 
 <script>
+import Prueba from "../components/Prueba.vue";
 import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
-import {
-  required,
-  maxLength,
-  minLength,
-  email,
-} from "vuelidate/lib/validators";
+import { Region, Province, District } from "ubigeos";
 
 Vue.use(VueAxios, axios);
 
 export default {
+  components: {
+    Prueba,
+  },
   data: () => ({
     loading: true,
     valid: true,
@@ -209,17 +252,22 @@ export default {
     headers: [
       { text: "N", value: "index" },
       { text: "Nombre o Razón Social ", value: "clientName" },
-      { text: "Tipo de Documento ", value: "typeDocument" },
-      { text: "Numero de Documento", value: "numberDocument" },
-      { text: "Dirección", value: "adress" },
+      { text: "Tipo ", value: "typeDocument" },
+      { text: "N° Documento", value: "numberDocument" },
+      { text: "Región", value: "region.name" },
+      { text: "Provincia", value: "provincie.name" },
+      { text: "Distrito", value: "district.name" },
       { text: "Telefono", value: "phone" },
       { text: "Correo", value: "email" },
-      { text: "Creado", value: "createdAt" },
+      { text: "Creado", value: "updatedAt" },
       { text: "Acciones", value: "actions", sortable: false },
     ],
     items: [],
     clients: [],
-    typeDocument:["DNI", "RUC", "OTROS"],
+    itemsRegions: [],
+    itemsProvinces: [],
+    itemsDistricts: [],
+    typeDocument: ["DNI", "RUC", "OTROS"],
     editedIndex: -1,
     editedItem: {
       clientName: "",
@@ -228,6 +276,9 @@ export default {
       adress: "",
       phone: "",
       email: "",
+      region: "",
+      provincie: "",
+      district: "",
     },
     editedItemRules: {
       clientName: [(v) => !!v || "Campo requerido"],
@@ -235,7 +286,13 @@ export default {
       numberDocument: [(v) => !!v || "Campo requerido"],
       adress: [(v) => !!v || "Campo requerido"],
       phone: [(v) => !!v || "Campo requerido"],
-      email: [(v) => !!v || "Campo requerido", v => /.+@.+\..+/.test(v) || 'Campo debe ser un email valido',],
+      email: [
+        (v) => !!v || "Campo requerido",
+        (v) => /.+@.+\..+/.test(v) || "Campo debe ser un email valido",
+      ],
+      region: [(v) => !!v || "Campo requerido"],
+      provincie: [(v) => !!v || "Campo requerido"],
+      district: [(v) => !!v || "Campo requerido"],
     },
     defaultItem: {
       clientName: "",
@@ -244,6 +301,9 @@ export default {
       adress: "",
       phone: "",
       email: "",
+      region:"",
+      provincie: "",
+      district: "",
     },
     path: {
       getAll: "clients",
@@ -278,6 +338,7 @@ export default {
   created() {
     this.headerRequests();
     this.getItems();
+    this.regions();
   },
 
   methods: {
@@ -323,6 +384,9 @@ export default {
         });
     },
     editItem(item) {
+      
+      this.provinces(item.region);
+      this.districts(item.provincie);
       this.editedIndex = this.items.indexOf(item);
       this.editedItem = { ...item };
       this.dialog = true;
@@ -398,6 +462,51 @@ export default {
           });
       }
       this.close();
+    },
+
+    regions() {
+      const regions = [];
+
+      for (let i = 1; i <= 25; i++) {
+        let region;
+        if (i < 10) {
+          region = Region.instance("0" + i);
+        } else {
+          region = Region.instance("" + i);
+        }
+        regions.push({ code: region.getCode(), name: region.getName() });
+      }
+      this.itemsRegions = regions;
+    },
+
+    provinces(item) {
+      console.log(item.code);
+      if (item.code == "") {
+        console.log("Seleccionar");
+      } else {
+        let provincies;
+        provincies = Region.instance(item.code).getProvincies();
+        this.itemsProvinces = provincies.map((x) => {
+          return { code: x.getCode(), name: x.getName() };
+        });
+        this.itemsDistricts = [];
+        this.editedItem.provincie ="";
+        this.editedItem.district ="";
+        
+      }
+    },
+
+    districts(item) {
+      this.editedItem.district ="";
+      if (item.code == "") {
+        console.log("Seleccionar");
+      } else {
+        let districts;
+        districts = Province.instance(item.code).getDistricts();
+        this.itemsDistricts = districts.map((x) => {
+          return { code: x.getCode(), name: x.getName() };
+        });
+      }
     },
   },
 };

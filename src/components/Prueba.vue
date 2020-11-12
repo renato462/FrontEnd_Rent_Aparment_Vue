@@ -1,20 +1,37 @@
 <template>
   <v-container fluid>
     <v-row align="center">
-      <v-col cols="6">
-        <v-subheader> Custom items </v-subheader>
+      <v-col cols="3">
+        <v-select
+          v-model="selectRegion"
+          :items="itemsRegions"
+          item-text="name"
+          item-value="code"
+          label="Región"
+          @change="provinces()"
+          return-object
+        ></v-select>
       </v-col>
 
-      <v-col cols="6">
+      <v-col cols="3">
         <v-select
-          v-model="select"
-          :items="properties2"
-          item-text="adressNickname"
-          item-value="_id"
-          label="Select"
-          persistent-hint
+          v-model="selectProvince"
+          :items="itemsProvinces"
+          item-text="name"
+          item-value="code"
+          label="Provincia"
+          @change="districts()"
           return-object
-          single-line
+        ></v-select>
+      </v-col>
+      <v-col cols="3">
+        <v-select
+          v-model="selectDistrict"
+          :items="itemsDistricts"
+          item-text="name"
+          item-value="code"
+          label="Distrito"
+          return-object
         ></v-select>
       </v-col>
     </v-row>
@@ -24,62 +41,76 @@
 import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
-  export default {
-    data: () => ({
-        select: { _id: "5f973a177f94c948404e3634", adressNickname: "Renato - Los Olivos", },
-        items: [
-          { state: 'Florida', abbr: 'FL' },
-          { state: 'Georgia', abbr: 'GA' },
-          { state: 'Nebraska', abbr: 'NE' },
-          { state: 'California', abbr: 'CA' },
-          { state: 'New York', abbr: 'NY' },
-        ],
-        properties: [],
-        properties2: [],
-        properties3:{text:"", value:""},
-        path: {
-        getAll: "aparments",
-        create: "aparment",
-        update: "aparment/",
-        delete: "aparment/",
-        },
-      
-    }),
+import { Region, Province, District } from "ubigeos";
+
+export default {
+  name: "Prueba",
+  data: () => ({
+    selectRegion: {
+      code: "",
+      name: "",
+    },
+    selectProvince: {
+      code: "",
+      name: "",
+    },
+    selectDistrict: {
+      code: "",
+      name: "",
+    },
+    itemsRegions: [],
+    itemsProvinces: [],
+    itemsDistricts: [],
+  }),
+  computed: {},
 
   created() {
-    this.headerRequests();
-    
-    this.getProperties();
+    this.regions();
   },
-
   methods: {
-    handlePageChange(value) {
-      this.page = value;
-     
-      this.getItems();
-    },
-    headerRequests() {
-      this.config = { headers: { "x-token": this.$store.state.token } };
+    regions() {
+      const regions = [];
+
+      for (let i = 1; i <= 25; i++) {
+        let region;
+        if (i < 10) {
+          region = Region.instance("0" + i);
+        } else {
+          region = Region.instance("" + i);
+        }
+        regions.push({ code: region.getCode(), name: region.getName() });
+      }
+
+      this.itemsRegions = regions;
     },
 
-    getProperties() {
-      const api = "properties";
-      let propertiesArray;
-      Vue.axios
-        .get(api, this.config)
-        .then((response) => {
-          propertiesArray = response.data.properties;
-          this.properties2 = response.data.properties;
-          console.log(this.properties2);
-          propertiesArray.map((x) => {
-            this.properties.push({ text: x.adressNickname, value: x._id });
-          });
-          console.log(this.properties);
-        })
-        .catch((error) => {
-          console.log(error);
+    provinces() {
+      
+      if (!this.selectRegion.code == "") {
+        let provincies;
+        provincies = Region.instance(this.selectRegion.code).getProvincies();
+        this.itemsProvinces = provincies.map((x) => {
+          return { code: x.getCode(), name: x.getName() };
         });
+
+        this.itemsDistricts = [];
+        
+        
+      } 
     },
-  }
-}
+
+    districts() {
+  
+      if (this.selectProvince.code == "") {
+        this.itemsDistricts = [];
+      } else {
+        let districts;
+        districts = Province.instance(this.selectProvince.code).getDistricts();
+        this.itemsDistricts = districts.map((x) => {
+          return { code: x.getCode(), name: x.getName() };
+        });
+      }
+    },
+  },
+};
 </script>
