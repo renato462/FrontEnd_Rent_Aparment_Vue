@@ -5,6 +5,7 @@ import Properties from "../components/Properties.vue";
 import Aparments from "../components/Aparments.vue";
 import Clients from "../components/Clients.vue";
 import Prueba from "../components/Prueba.vue";
+import Apexcharts from "../components/Apexcharts.vue";
 import Error from "../views/Error.vue";
 import store from "../store/index";
 
@@ -47,6 +48,12 @@ const routes = [
     path: "/prueba",
     name: "Prueba",
     component: Prueba,
+    
+  },
+  {
+    path: "/apexcharts",
+    name: "Apexcharts",
+    component: Apexcharts,
     
   },
 

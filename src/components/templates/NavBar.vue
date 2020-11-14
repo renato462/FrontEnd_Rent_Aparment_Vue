@@ -1,49 +1,33 @@
 <template>
   <div>
-    <v-app-bar app color="primary" dark style="height: 56px">
-      <div class="d-flex align-center">
-        <v-img
-          position='center center'
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
+    <v-app-bar app color="primary" dark>
+      <!-- <div class="d-flex align-center">
+        <v-icon>mdi-home</v-icon>
+        <h1 class="mr-2 ml-40">Rent@ Hogar</h1>
+      </div> -->
+      <v-app-bar-nav-icon @click="$store.state.drawer = !$store.state.drawer"></v-app-bar-nav-icon>
 
-        <v-img
-          position='center center'n
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
+      <v-toolbar-title>Rent@ Hogar</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
-      <v-btn
-        @click="logout"
-        target="_blank"
-        text
-      >
+      <v-btn @click="logout" target="_blank" text>
         <span class="mr-2">Salir</span>
-        <v-icon >mdi-logout-variant</v-icon>
+        <v-icon>mdi-logout-variant</v-icon>
       </v-btn>
     </v-app-bar>
   </div>
 </template>
 
 <script>
-import {mapActions} from 'vuex'
+import { mapActions } from "vuex";
 export default {
   name: "NavBar",
+  
+  data: () => ({  }),
   methods: {
-    ...mapActions(['logout'])
-  }
+    ...mapActions(["logout","drawer"]),
+  },
 };
 </script>
  

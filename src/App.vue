@@ -1,9 +1,9 @@
 <template>
   <v-app>
     <Login v-if="viewLogin"> </Login>
-    <NavBar v-if="!viewLogin" />
+    <NavBar v-if="!viewLogin"/>
 
-    <Navigation v-if="!viewLogin" />
+    <Navigation v-if="!viewLogin"/>
 
     <!-- Sizes your content based upon application components -->
     <v-main v-if="!viewLogin">
@@ -38,7 +38,7 @@ export default {
     
   },
   data: () => ({
-    data: false,
+   
   }),
   computed: {
     viewLogin() {

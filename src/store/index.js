@@ -9,6 +9,7 @@ export default new Vuex.Store({
   state: {
     token: null,
     user: null,
+    drawer:null,
   },
   mutations: {
     setToken(state, token) {
@@ -17,8 +18,14 @@ export default new Vuex.Store({
     setUser(state, user) {
       state.user = user;
     },
+    setDrawer(state, drawer){
+      state.drawer = drawer;
+    }
   },
   actions: {
+    drawer({commit},drawer){
+      commit("setDrawer", drawer);
+    },
     saveToken({ commit }, token) {
       commit("setToken", token);
       commit("setUser", decode(token));

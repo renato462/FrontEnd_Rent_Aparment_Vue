@@ -7,12 +7,14 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "apexcharts": "^3.22.2",
     "axios": "^0.21.0",
     "core-js": "^3.6.5",
     "jwt-decode": "^3.0.0",
     "ubigeos": "^2.1.0",
     "vee-validate": "^3.4.3",
     "vue": "^2.6.11",
+    "vue-apexcharts": "^1.6.0",
     "vue-axios": "^3.1.2",
     "vue-router": "^3.2.0",
     "vue-sweetalert2": "^3.0.8",
