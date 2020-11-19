@@ -22,7 +22,7 @@
           <v-text-field
             v-model="search"
             append-icon="mdi-magnify"
-            :label="'Buscar ' +title2"
+            :label="'Buscar ' + title2"
             single-line
             hide-details
           ></v-text-field>
@@ -31,10 +31,16 @@
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nueva {{title2}}
+                Nueva {{ title2 }}
               </v-btn>
             </template>
             <v-card>
+              <v-form
+                @submit.prevent="submit"
+                ref="form"
+                v-model="valid"
+                lazy-validation
+              >
               <v-card-title>
                 <span class="headline">{{ formTitle }}</span>
               </v-card-title>
@@ -46,9 +52,8 @@
                       <v-text-field
                         v-model="editedItem.adressNickname"
                         label="NickName de la Propiedad"
-                        :error-messages="errorsMsgAdressNickname"
+                        :rules="editedItemRules.adressNickname"
                         required
-                        @blur="$v.editedItem.adressNickname.$touch()"
                       >
                       </v-text-field>
                     </v-col>
@@ -56,10 +61,57 @@
                       <v-text-field
                         v-model="editedItem.adress"
                         label="Dirección"
-                        :error-messages="errorsMsgAdress"
+                        :rules="editedItemRules.adress"
                         required
-                        @blur="$v.editedItem.adress.$touch()"
                       ></v-text-field>
+                    </v-col>
+                    
+                  </v-row >
+
+                  <v-row
+                  >
+
+                    <v-col cols="4" sm="12" md="4">
+                      <v-autocomplete
+                        v-model="editedItem.region"
+                        :items="itemsRegions"
+                        item-text="name"
+                        item-value="code"
+                        label="Región"
+                        required
+                        return-object
+                        :rules="editedItemRules.region"
+                        @change="provinces(editedItem.region)"
+                      ></v-autocomplete>
+                    </v-col>
+
+                    <v-col cols="4" sm="12" md="4">
+                      <v-autocomplete
+                        v-model="editedItem.provincie"
+                        :rules="editedItemRules.provincie"
+                        :items="itemsProvinces"
+                        item-text="name"
+                        item-value="code"
+                        label="Provincia"
+                        @change="districts(editedItem.provincie)"
+                        return-object
+                        required
+                        
+                      ></v-autocomplete>
+                    </v-col>
+
+                    <v-col cols="4" sm="12" md="4">
+                      <v-autocomplete
+                        v-model="editedItem.district"
+                        :rules="editedItemRules.district"
+                        :items="itemsDistricts"
+                        item-text="name"
+                        item-value="code"
+                        label="Distrito"
+                        return-object
+                        required
+                       
+                      ></v-autocomplete>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -72,20 +124,21 @@
                 </v-btn>
                 <v-btn
                   color="green darken-1"
-                  :dark="$v.$invalid ? false : true"
+                  :dark="!valid ? false : true"
                   @click="save"
-                  :disabled="$v.$invalid"
+                  :disabled="!valid"
                 >
                   Guardar
                 </v-btn>
               </v-card-actions>
+              </v-form>
             </v-card>
           </v-dialog>
 
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="headline"
-                >Estas seguro de borrar la {{title2}}?</v-card-title
+                >Estas seguro de borrar la {{ title2 }}?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -116,10 +169,10 @@
 </template>
 
 <script>
-
 import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
+import { Region, Province, District } from "ubigeos";
 import {
   required,
   maxLength,
@@ -131,7 +184,8 @@ Vue.use(VueAxios, axios);
 
 export default {
   data: () => ({
-    title1:"Propiedades",
+    valid: true,
+    title1: "Propiedades",
     title2: "Propiedad",
     search: "",
     dialog: false,
@@ -140,58 +194,53 @@ export default {
     pageCount: 0,
     itemsPerPage: 10,
     headers: [
-      { text: "N", value: "index"},
-      { text: "Nick Name ", value: "adressNickname" },
-      { text: "Dirección", value: "adress" },
+      { text: "N", value: "index" , width: "60px" },
+      { text: "Nick Name ", value: "adressNickname" , width: "200px" },
+      { text: "Dirección", value: "adress" , width: "250px" },
+      { text: "Region", value: "region.name", width: "120px" },
+      { text: "Provincia", value: "provincie.name", width: "120px" },
+      { text: "Distrito", value: "district.name", width: "120px" },
+      
+      
       { text: "Actions", value: "actions", sortable: false },
     ],
     properties: [],
     editedIndex: -1,
+    itemsRegions: [],
+    itemsProvinces: [],
+    itemsDistricts: [],
     editedItem: {
       adressNickname: "",
       adress: "",
+      region: "",
+      provincie: "",
+      district: "",
+    },
+    editedItemRules: {
+      adressNickname: [(v) => !!v || "Campo requerido"],
+      adress: [(v) => !!v || "Campo requerido"],
+      region: [(v) => !!v || "Campo requerido"],
+      provincie: [(v) => !!v || "Campo requerido"],
+      district: [(v) => !!v || "Campo requerido"],
     },
     defaultItem: {
       adressNickname: "",
       adress: "",
+      region: "",
+      provincie: "",
+      district: "",
     },
-    config:"",
+    config: "",
   }),
 
-  validations: {
-    editedItem: {
-      adressNickname: { required, minLength: minLength(4) },
-      adress: { required, minLength: minLength(4) },
-    },
-  },
-  created() {
-
-  },
+  created() {},
   computed: {
-   
     formTitle() {
-      return this.editedIndex === -1 ? "Nueva "+this.title2 : "Editar "+this.title2;
+      return this.editedIndex === -1
+        ? "Nueva " + this.title2
+        : "Editar " + this.title2;
     },
-    // Mensajes de Error para Validación
-    errorsMsgAdressNickname() {
-      const errors = [];
-      if (!this.$v.editedItem.adressNickname.$dirty) return errors;
-      !this.$v.editedItem.adressNickname.required &&
-        errors.push("(*) Campo obligatorio.");
-      !this.$v.editedItem.adressNickname.minLength &&
-        errors.push("(*) Cantidad mínima de caracteres es 4.");
-      return errors;
-    },
-    errorsMsgAdress() {
-      const errors = [];
-      if (!this.$v.editedItem.adress.$dirty) return errors;
-      !this.$v.editedItem.adress.required &&
-        errors.push("(*) Campo obligatorio.");
-      !this.$v.editedItem.adress.minLength &&
-        errors.push("(*) Cantidad mínima de caracteres es 4.");
-      return errors;
-    },
-    //////////////////////
+    
   },
 
   watch: {
@@ -206,17 +255,18 @@ export default {
   created() {
     this.headerRequests();
     this.getProperties();
+    this.regions();
   },
 
   methods: {
-     headerRequests(){
-      this.config = {headers : {"x-token" : this.$store.state.token}};
+    headerRequests() {
+      this.config = { headers: { "x-token": this.$store.state.token } };
     },
     getProperties() {
       const api = "properties";
-      
+
       Vue.axios
-        .get(api,this.config)
+        .get(api, this.config)
         .then((response) => {
           this.properties = response.data.properties;
 
@@ -231,6 +281,9 @@ export default {
         });
     },
     editItem(item) {
+
+      this.provinces(item.region);
+      this.districts(item.provincie);
       this.editedIndex = this.properties.indexOf(item);
       this.editedItem = { ...item };
       this.dialog = true;
@@ -245,7 +298,7 @@ export default {
     deleteItemConfirm() {
       const api = "property/" + this.editedItem._id;
       Vue.axios
-        .delete(api,this.config)
+        .delete(api, this.config)
         .then((response) => {
           this.getProperties();
         })
@@ -262,7 +315,8 @@ export default {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
       });
-      this.$v.$reset(); // Borrar validacion
+      // this.$v.$reset(); // Borrar validacion
+      this.$refs.form.reset(); // Borrar validacion
     },
 
     closeDelete() {
@@ -278,7 +332,7 @@ export default {
         const api = "property/" + this.editedItem._id;
         console.log(this.config);
         Vue.axios
-          .put(api, { ...this.editedItem },this.config)
+          .put(api, { ...this.editedItem }, this.config)
           .then((response) => {
             this.getProperties();
           })
@@ -288,7 +342,7 @@ export default {
       } else {
         const api = "property";
         Vue.axios
-          .post(api, { ...this.editedItem },this.config)
+          .post(api, { ...this.editedItem }, this.config)
           .then((response) => {
             this.getProperties();
           })
@@ -297,6 +351,48 @@ export default {
           });
       }
       this.close();
+    },
+    regions() {
+      const regions = [];
+
+      for (let i = 1; i <= 25; i++) {
+        let region;
+        if (i < 10) {
+          region = Region.instance("0" + i);
+        } else {
+          region = Region.instance("" + i);
+        }
+        regions.push({ code: region.getCode(), name: region.getName() });
+      }
+      this.itemsRegions = regions;
+    },
+
+    provinces(item) {
+      if (item.code == "") {
+        console.log("Seleccionar");
+      } else {
+        let provincies;
+        provincies = Region.instance(item.code).getProvincies();
+        this.itemsProvinces = provincies.map((x) => {
+          return { code: x.getCode(), name: x.getName() };
+        });
+        this.itemsDistricts = [];
+        this.editedItem.provincie = "";
+        this.editedItem.district = "";
+      }
+    },
+    districts(item) {
+      console.log(item);
+      this.editedItem.district = "";
+      if (item.code == "") {
+        console.log("Seleccionar");
+      } else {
+        let districts;
+        districts = Province.instance(item.code).getDistricts();
+        this.itemsDistricts = districts.map((x) => {
+          return { code: x.getCode(), name: x.getName() };
+        });
+      }
     },
   },
 };

@@ -28,7 +28,7 @@
           ></v-text-field>
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
+          <v-dialog v-model="dialog" max-width="100%">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                 Nueva {{ title2 }}
@@ -87,7 +87,7 @@
                         ></v-text-field>
                       </v-col>
 
-                      <v-col cols="3" sm="12" md="12">
+                      <v-col cols="4" sm="12" md="4">
                         <v-autocomplete
                           v-model="editedItem.region"
                           :items="itemsRegions"
@@ -100,9 +100,9 @@
                           @change="provinces(editedItem.region)"
                         ></v-autocomplete>
                       </v-col>
-                      {{ editedItem.region }}
                     
-                      <v-col cols="3" sm="12" md="12">
+                    
+                      <v-col cols="4" sm="12" md="4">
                         <v-autocomplete
                           v-model="editedItem.provincie"
                           :rules="editedItemRules.provincie"
@@ -115,9 +115,9 @@
                           required
                         ></v-autocomplete>
                       </v-col>
-                      {{ editedItem.provincie }}
+                   
 
-                      <v-col cols="3" sm="12" md="12">
+                      <v-col cols="4" sm="12" md="4">
                         <v-autocomplete
                           v-model="editedItem.district"
                           :rules="editedItemRules.district"
@@ -129,9 +129,17 @@
                           required
                         ></v-autocomplete>
                       </v-col>
-                      {{ editedItem.district }}
+                      
 
-                      <v-col cols="12" sm="12" md="12">
+                    <v-col cols="4" sm="12" md="4">
+                        <v-text-field
+                          v-model="editedItem.contact"
+                          :rules="editedItemRules.contact"
+                          label="Contacto "
+                          required
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="4" sm="12" md="4">
                         <v-text-field
                           v-model="editedItem.phone"
                           :rules="editedItemRules.phone"
@@ -139,7 +147,7 @@
                           required
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="12" md="12">
+                      <v-col cols="4" sm="12" md="4">
                         <v-text-field
                           v-model="editedItem.email"
                           :rules="editedItemRules.email"
@@ -244,22 +252,23 @@ export default {
     search: "",
     dialog: false,
     dialogDelete: false,
+    
 
     page: 1,
     pageCount: 0,
     pageNumber: 0,
     itemsPerPage: 10,
     headers: [
-      { text: "N", value: "index" },
-      { text: "Nombre o Razón Social ", value: "clientName" },
-      { text: "Tipo ", value: "typeDocument" },
-      { text: "N° Documento", value: "numberDocument" },
-      { text: "Región", value: "region.name" },
-      { text: "Provincia", value: "provincie.name" },
-      { text: "Distrito", value: "district.name" },
-      { text: "Telefono", value: "phone" },
-      { text: "Correo", value: "email" },
-      { text: "Creado", value: "updatedAt" },
+      { text: "N", value: "index", width: "80px"  },
+      { text: "Nombre o Razón Social ", value: "clientName", width: "200px" },
+      { text: "Tipo ", value: "typeDocument" , width: "100px"  },
+      { text: "# Documento", value: "numberDocument", width: "150px"  },
+      { text: "Distrito", value: "district.name", width: "100px"  },
+      { text: "Provincia", value: "provincie.name" , width: "100px" },
+      { text: "Contacto", value: "contact" , width: "200px" },
+      { text: "Telefono", value: "phone" , width: "100px" },
+      { text: "Correo", value: "email", width: "200px"  },
+      
       { text: "Acciones", value: "actions", sortable: false },
     ],
     items: [],
@@ -267,13 +276,14 @@ export default {
     itemsRegions: [],
     itemsProvinces: [],
     itemsDistricts: [],
-    typeDocument: ["DNI", "RUC", "OTROS"],
+    typeDocument: ["DNI", "RUC", "CE", "PASAPORTE", "OTROS"],
     editedIndex: -1,
     editedItem: {
       clientName: "",
       typeDocument: "",
       numberDocument: "",
       adress: "",
+      contact:"",
       phone: "",
       email: "",
       region: "",
@@ -290,6 +300,7 @@ export default {
         (v) => !!v || "Campo requerido",
         (v) => /.+@.+\..+/.test(v) || "Campo debe ser un email valido",
       ],
+      contact: [(v) => !!v || "Campo requerido"],
       region: [(v) => !!v || "Campo requerido"],
       provincie: [(v) => !!v || "Campo requerido"],
       district: [(v) => !!v || "Campo requerido"],
@@ -299,6 +310,7 @@ export default {
       typeDocument: "",
       numberDocument: "",
       adress: "",
+      contact: "",
       phone: "",
       email: "",
       region:"",
@@ -344,7 +356,6 @@ export default {
   methods: {
     handlePageChange(value) {
       this.page = value;
-      console.log("renato");
       this.getItems();
     },
     headerRequests() {
@@ -480,7 +491,7 @@ export default {
     },
 
     provinces(item) {
-      console.log(item.code);
+      
       if (item.code == "") {
         console.log("Seleccionar");
       } else {
