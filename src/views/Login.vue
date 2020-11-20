@@ -15,19 +15,29 @@
                         >
                           Rent@ HOGAR
                         </h1>
+                      
                         <div class="text-center mt-4">
-                          <v-btn class="mx-2" fab color="black" outlined>
+                          <!-- <v-btn class="mx-2" fab color="black" outlined>
                             <v-icon>fab fa-facebook-f</v-icon>
-                          </v-btn>
-                          <v-btn class="mx-2" fab color="black" outlined>
+                          </v-btn> -->
+                          <v-btn
+                            @click="loginGoogle2"
+                            class="mx-2"
+                            fab
+                            color="black"
+                            outlined
+                          >
                             <v-icon>fab fa-google-plus-g</v-icon>
                           </v-btn>
-                          <v-btn class="mx-2" fab color="black" outlined>
+
+                          <!-- <v-btn class="mx-2" fab color="black" outlined>
                             <v-icon>fab fa-linkedin-in</v-icon>
-                          </v-btn>
+                          </v-btn> -->
                         </div>
                         <v-divider class="mt-4"></v-divider>
-                        <h4 class="text-center mt-4">Ingrese su email para acceso</h4>
+                        <h4 class="text-center mt-4">
+                          Ingrese su email para acceso
+                        </h4>
                         <v-form>
                           <v-text-field
                             label="Email"
@@ -54,9 +64,9 @@
                         </v-form>
                         <h3 class="text-center mt-3">Olvido su password ?</h3>
                       </v-card-text>
-                          <p v-if="hasErrorLogin" class="red--text text-center">
-                            (*) El email o password se encuentran equivocados
-                          </p>
+                      <p v-if="hasErrorLogin" class="red--text text-center">
+                        (*) El email o password se encuentran equivocados
+                      </p>
                       <div class="text-center mb-3">
                         <v-btn
                           rounded
@@ -88,9 +98,7 @@
                     <v-col cols="12" md="4" class="teal accent-3">
                       <v-card-text class="white--text mt-12">
                         <h1 class="text-center display-1">Hola, Familia !</h1>
-                        <h3 class="text-center mt-4">
-                          Ingresa a tu cuenta
-                        </h3>
+                        <h3 class="text-center mt-4">Ingresa a tu cuenta</h3>
                       </v-card-text>
                       <div class="text-center">
                         <v-btn rounded outlined dark @click="step--"
@@ -106,15 +114,15 @@
                           Crear cuenta
                         </h1>
                         <div class="text-center mt-4">
-                          <v-btn class="mx-2" fab color="black" outlined>
+                          <!-- <v-btn class="mx-2" fab color="black" outlined>
                             <v-icon>fab fa-facebook-f</v-icon>
-                          </v-btn>
-                          <v-btn class="mx-2" fab color="black" outlined>
+                          </v-btn> -->
+                          <v-btn @click="loginGoogle2" class="mx-2" fab color="black" outlined>
                             <v-icon>fab fa-google-plus-g</v-icon>
                           </v-btn>
-                          <v-btn class="mx-2" fab color="black" outlined>
+                          <!-- <v-btn class="mx-2" fab color="black" outlined>
                             <v-icon>fab fa-linkedin-in</v-icon>
-                          </v-btn>
+                          </v-btn> -->
                         </div>
                         <v-divider class="mt-4"></v-divider>
                         <h4 class="text-center mt-4">
@@ -195,6 +203,8 @@
 import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
+import GoogleLogin from "vue-google-login";
+import { LoaderPlugin } from "vue-google-login";
 import {
   required,
   maxLength,
@@ -203,8 +213,13 @@ import {
 } from "vuelidate/lib/validators";
 import { mapState, mapMutations, mapActions } from "vuex";
 
+Vue.use(LoaderPlugin, {
+  client_id:
+    "1078525668613-qj6rlnklnjpt4lc89velt3feuvt10tq9.apps.googleusercontent.com",
+});
 export default {
   data: () => ({
+   
     step: 1,
     user: {
       email: "",
@@ -227,6 +242,9 @@ export default {
       email: { required, email },
       password: { required },
     },
+  },
+  components: {
+    GoogleLogin,
   },
   computed: {
     // Mensajes de Error para Validación
@@ -259,7 +277,7 @@ export default {
   methods: {
     login() {
       const api = "login";
-   
+
       Vue.axios
         .post(api, this.user)
         .then((response) => {
@@ -270,7 +288,26 @@ export default {
           this.$router.push("/properties");
         })
         .catch((error) => {
-         
+          if (error.response.data.msg) {
+            this.hasErrorLogin = true;
+          } else {
+            this.hasErrorLogin = false;
+          }
+        });
+    },
+    loginGoogle(user) {
+      const api = "login/google";
+
+      Vue.axios
+        .post(api, user)
+        .then((response) => {
+          return response.data;
+        })
+        .then((data) => {
+          this.$store.dispatch("saveToken", data.token);
+          this.$router.push("/properties");
+        })
+        .catch((error) => {
           if (error.response.data.msg) {
             this.hasErrorLogin = true;
           } else {
@@ -291,13 +328,23 @@ export default {
           this.$router.push("/properties");
         })
         .catch((error) => {
-         
           if (error.response.data.msg) {
             this.hasError = true;
           } else {
             this.hasError = false;
           }
         });
+    },
+   
+    loginGoogle2() {
+      Vue.GoogleAuth.then((auth2) => {
+        
+        this.user.token = auth2.currentUser.get().xc.id_token;
+        this.loginGoogle(this.user);
+      })
+      .catch((err) =>{
+        console.log(err);
+      });
     },
   },
 };

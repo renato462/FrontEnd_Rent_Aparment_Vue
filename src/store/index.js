@@ -39,10 +39,7 @@ export default new Vuex.Store({
       if (decode(token).exp < new Date().getTime() / 1000) {
 
         this.dispatch("logout");
-        // commit("setToken", null);
-        // commit("setUser", null);
-        // localStorage.removeItem("token");
-        // router.push("/login");
+   
       } else {
         commit("setToken", token);
         commit("setUser", decode(token));
