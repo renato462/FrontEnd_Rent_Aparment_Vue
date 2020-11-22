@@ -86,6 +86,7 @@ export default {
       ],
       itemsSimple: [
         { title: "Dashboard", icon: "mdi-home-city", to: "/login" },
+        { title: "Rentados", icon: "mdi-home", to: "/rents" },
         { title: "Mi cuenta", icon: "mdi-account", to: "" },
         { title: "Usuarios", icon: "mdi-account-group", to: "" },
       ],

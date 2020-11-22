@@ -17,21 +17,27 @@
         <v-toolbar flat>
           <v-toolbar-title>{{ title1 }}</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
+        
 
           <v-text-field
+          class="mx-6"
             v-model="search"
             append-icon="mdi-magnify"
             :label="'Buscar ' + title2"
             single-line
             hide-details
           ></v-text-field>
-          <v-spacer></v-spacer>
-          <v-spacer></v-spacer>
+          
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nueva {{ title2 }}
+              <v-btn  color="primary"
+                dark
+                fab
+                small
+                class=""
+                v-bind="attrs"
+                v-on="on">
+               <v-icon dark> mdi-plus </v-icon>
               </v-btn>
             </template>
             <v-card>
@@ -68,6 +74,7 @@
                         <v-text-field
                           v-model="editedItem.price"
                           :rules="editedItemRules.price"
+                          prefix="S/."
                           label="Precio"
                           required
                         ></v-text-field>
@@ -126,8 +133,16 @@
         </v-toolbar>
       </template>
 
+      <template v-slot:item.price="{ item }">
+        <span>{{ new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(item.price)}}</span>
+      </template>
+
       <template v-slot:item.createdAt="{ item }">
         <span>{{ new Date(item.createdAt).toLocaleDateString() }}</span>
+      </template>
+
+      <template v-slot:item.updatedAt="{ item }">
+        <span>{{ new Date(item.updatedAt).toLocaleDateString() }}</span>
       </template>
 
       <template v-slot:item.actions="{ item }">
@@ -143,8 +158,8 @@
     <div class="text-center pt-2">
       <v-pagination
         v-model="page"
-        :length="pageNumber"
-        @input="handlePageChange"
+        :length="pageCount"
+        
       ></v-pagination>
     </div>
   </div>
@@ -175,15 +190,15 @@ export default {
 
     page: 1,
     pageCount: 0,
-    pageNumber: 0,
     itemsPerPage: 10,
     headers: [
       { text: "N", value: "index" },
+      { text: "Propiedad", value: "propertyId.adressNickname" },
       { text: "Codigo ", value: "code" },
       { text: "Piso ", value: "floor" },
       { text: "Precio", value: "price" },
-      { text: "Propiedad", value: "propertyId.adressNickname" },
       { text: "Creado", value: "createdAt" },
+      { text: "Actualizado", value: "updatedAt" },
       { text: "Acciones", value: "actions", sortable: false },
     ],
     properties: [],
@@ -222,12 +237,7 @@ export default {
         ? "Nueva " + this.title2
         : "Editar " + this.title2;
     },
-    // updateTable() {
-
-    //   return this.getItems();
-    // },
   },
-
   watch: {
     dialog(val) {
       val || this.close();
@@ -236,19 +246,13 @@ export default {
       val || this.closeDelete();
     },
   },
-
   created() {
     this.headerRequests();
     this.getItems();
     this.getProperties();
   },
-
   methods: {
-    handlePageChange(value) {
-      this.page = value;
-      console.log("renato");
-      this.getItems();
-    },
+  
     headerRequests() {
       this.config = { headers: { "x-token": this.$store.state.token } };
     },
@@ -267,33 +271,19 @@ export default {
     },
 
     getItems() {
-      const api = this.path.getAll + "?page=" + this.page;
+      const api = this.path.getAll;
       this.loading = true;
-
       Vue.axios
         .get(api, this.config)
         .then((response) => {
           this.loading = false;
-
           // Se debe cambiar en cada iteración
           this.items = response.data.aparments;
-          this.pageNumber = +Math.ceil(
-            response.data.aparmentTotal / this.itemsPerPage
-          );
-
-          // Agregar Index para la Tabla
-          let i;
-          if (this.page == 1) {
-            i = 1;
-          } else {
-            i = (this.page - 1) * this.itemsPerPage + 1;
-          }
-
+          let i=1;
           for (const item of this.items) {
             item.index = i++;
           }
         })
-
         .catch((error) => {
           console.log(error);
         });
@@ -330,7 +320,6 @@ export default {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
       });
-      // this.$v.$reset(); // Borrar validacion
       this.$refs.form.reset(); // Borrar validacion
     },
 
@@ -363,7 +352,6 @@ export default {
           });
       } else {
         const api = this.path.create;
-
         Vue.axios
           .post(api, { ...this.editedItem }, this.config)
           .then((response) => {

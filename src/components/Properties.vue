@@ -7,31 +7,37 @@
       :items-per-page="itemsPerPage"
       :search="search"
       locale="es"
-      loading="true"
+      :loading="loading"
       loading-text="Cargando datos ... Por favor espere"
       class="elevation-1"
       hide-default-footer
       @page-count="pageCount = $event"
     >
       <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>{{ title1 }}</v-toolbar-title>
+        <v-toolbar flat dense>
+          <v-toolbar-title class="">{{ title1 }}</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
 
           <v-text-field
+            class="mx-6"
             v-model="search"
             append-icon="mdi-magnify"
-            :label="'Buscar ' + title2"
+            :label="'Buscar ' + title1"
             single-line
             hide-details
           ></v-text-field>
-          <v-spacer></v-spacer>
-          <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nueva {{ title2 }}
+              <v-btn
+                color="primary"
+                dark
+                fab
+                small
+                class=""
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon dark> mdi-plus </v-icon>
               </v-btn>
             </template>
             <v-card>
@@ -41,96 +47,91 @@
                 v-model="valid"
                 lazy-validation
               >
-              <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
-              </v-card-title>
+                <v-card-title>
+                  <span class="headline">{{ formTitle }}</span>
+                </v-card-title>
 
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12" sm="12" md="12">
-                      <v-text-field
-                        v-model="editedItem.adressNickname"
-                        label="NickName de la Propiedad"
-                        :rules="editedItemRules.adressNickname"
-                        required
-                      >
-                      </v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="12" md="12">
-                      <v-text-field
-                        v-model="editedItem.adress"
-                        label="Dirección"
-                        :rules="editedItemRules.adress"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                    
-                  </v-row >
+                <v-card-text>
+                  <v-container>
+                    <v-row>
+                      <v-col cols="12" sm="12" md="12">
+                        <v-text-field
+                          v-model="editedItem.adressNickname"
+                          label="NickName de la Propiedad"
+                          :rules="editedItemRules.adressNickname"
+                          required
+                        >
+                        </v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="12" md="12">
+                        <v-text-field
+                          v-model="editedItem.adress"
+                          label="Dirección"
+                          :rules="editedItemRules.adress"
+                          required
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
 
-                  <v-row
+                    <v-row>
+                      <v-col cols="4" sm="12" md="4">
+                        <v-autocomplete
+                          v-model="editedItem.region"
+                          :items="itemsRegions"
+                          item-text="name"
+                          item-value="code"
+                          label="Región"
+                          required
+                          return-object
+                          :rules="editedItemRules.region"
+                          @change="provinces(editedItem.region)"
+                        ></v-autocomplete>
+                      </v-col>
+
+                      <v-col cols="4" sm="12" md="4">
+                        <v-autocomplete
+                          v-model="editedItem.provincie"
+                          :rules="editedItemRules.provincie"
+                          :items="itemsProvinces"
+                          item-text="name"
+                          item-value="code"
+                          label="Provincia"
+                          @change="districts(editedItem.provincie)"
+                          return-object
+                          required
+                        ></v-autocomplete>
+                      </v-col>
+
+                      <v-col cols="4" sm="12" md="4">
+                        <v-autocomplete
+                          v-model="editedItem.district"
+                          :rules="editedItemRules.district"
+                          :items="itemsDistricts"
+                          item-text="name"
+                          item-value="code"
+                          label="Distrito"
+                          return-object
+                          required
+                        ></v-autocomplete>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" :dark="true" @click="close">
+                    Cancelar
+                  </v-btn>
+                  <v-btn
+                    color="green darken-1"
+                    :dark="!valid ? false : true"
+                    @click="save"
+                    :disabled="!valid"
                   >
-
-                    <v-col cols="4" sm="12" md="4">
-                      <v-autocomplete
-                        v-model="editedItem.region"
-                        :items="itemsRegions"
-                        item-text="name"
-                        item-value="code"
-                        label="Región"
-                        required
-                        return-object
-                        :rules="editedItemRules.region"
-                        @change="provinces(editedItem.region)"
-                      ></v-autocomplete>
-                    </v-col>
-
-                    <v-col cols="4" sm="12" md="4">
-                      <v-autocomplete
-                        v-model="editedItem.provincie"
-                        :rules="editedItemRules.provincie"
-                        :items="itemsProvinces"
-                        item-text="name"
-                        item-value="code"
-                        label="Provincia"
-                        @change="districts(editedItem.provincie)"
-                        return-object
-                        required
-                        
-                      ></v-autocomplete>
-                    </v-col>
-
-                    <v-col cols="4" sm="12" md="4">
-                      <v-autocomplete
-                        v-model="editedItem.district"
-                        :rules="editedItemRules.district"
-                        :items="itemsDistricts"
-                        item-text="name"
-                        item-value="code"
-                        label="Distrito"
-                        return-object
-                        required
-                       
-                      ></v-autocomplete>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" :dark="true" @click="close">
-                  Cancelar
-                </v-btn>
-                <v-btn
-                  color="green darken-1"
-                  :dark="!valid ? false : true"
-                  @click="save"
-                  :disabled="!valid"
-                >
-                  Guardar
-                </v-btn>
-              </v-card-actions>
+                    Guardar
+                  </v-btn>
+                </v-card-actions>
               </v-form>
             </v-card>
           </v-dialog>
@@ -173,20 +174,15 @@ import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
 import { Region, Province, District } from "ubigeos";
-import {
-  required,
-  maxLength,
-  minLength,
-  email,
-} from "vuelidate/lib/validators";
 
 Vue.use(VueAxios, axios);
 
 export default {
   data: () => ({
+    loading: true,
     valid: true,
     title1: "Propiedades",
-    title2: "Propiedad",
+    title2: "",
     search: "",
     dialog: false,
     dialogDelete: false,
@@ -194,14 +190,13 @@ export default {
     pageCount: 0,
     itemsPerPage: 10,
     headers: [
-      { text: "N", value: "index" , width: "60px" },
-      { text: "Nick Name ", value: "adressNickname" , width: "200px" },
-      { text: "Dirección", value: "adress" , width: "250px" },
+      { text: "N", value: "index", width: "60px" },
+      { text: "Nick Name ", value: "adressNickname", width: "200px" },
+      { text: "Dirección", value: "adress", width: "" },
       { text: "Region", value: "region.name", width: "120px" },
       { text: "Provincia", value: "provincie.name", width: "120px" },
-      { text: "Distrito", value: "district.name", width: "120px" },
-      
-      
+      { text: "Distrito", value: "district.name", width: "" },
+
       { text: "Actions", value: "actions", sortable: false },
     ],
     properties: [],
@@ -240,7 +235,6 @@ export default {
         ? "Nueva " + this.title2
         : "Editar " + this.title2;
     },
-    
   },
 
   watch: {
@@ -260,14 +254,16 @@ export default {
 
   methods: {
     headerRequests() {
-      this.config = { headers: { "x-token": this.$store.state.token } };
+      this.config = { headers: { "x-token": this.$store.state.token }};
     },
     getProperties() {
       const api = "properties";
-
+      this.loading = true;
       Vue.axios
         .get(api, this.config)
         .then((response) => {
+
+          this.loading = false;
           this.properties = response.data.properties;
 
           // Agregar Index para la Tabla
@@ -281,7 +277,6 @@ export default {
         });
     },
     editItem(item) {
-
       this.provinces(item.region);
       this.districts(item.provincie);
       this.editedIndex = this.properties.indexOf(item);
@@ -305,7 +300,6 @@ export default {
         .catch((error) => {
           console.log(error);
         });
-
       this.closeDelete();
     },
 
@@ -326,8 +320,15 @@ export default {
         this.editedIndex = -1;
       });
     },
-
     save() {
+      if (!this.$refs.form.validate()) {
+        this.$refs.form.validate();
+      } else {
+        this.saveFinal();
+      }
+    },
+
+    saveFinal() {
       if (this.editedIndex > -1) {
         const api = "property/" + this.editedItem._id;
         console.log(this.config);

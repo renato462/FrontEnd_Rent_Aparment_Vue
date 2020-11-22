@@ -15,23 +15,31 @@
     >
       <template v-slot:top>
         <v-toolbar flat>
+          
+
+          
+          
           <v-toolbar-title>{{ title1 }}</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
-
           <v-text-field
+           class="mx-6"
             v-model="search"
             append-icon="mdi-magnify"
             :label="'Buscar ' + title2"
             single-line
             hide-details
           ></v-text-field>
-          <v-spacer></v-spacer>
-          <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="100%">
+          
+          <v-dialog v-model="dialog" max-width="60%">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nueva {{ title2 }}
+              <v-btn  color="primary"
+                dark
+                fab
+                small
+                class=""
+                v-bind="attrs"
+                v-on="on">
+               <v-icon dark> mdi-plus </v-icon>
               </v-btn>
             </template>
             <v-card>
