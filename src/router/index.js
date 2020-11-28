@@ -5,6 +5,7 @@ import Properties from "../components/Properties.vue";
 import Aparments from "../components/Aparments.vue";
 import Clients from "../components/Clients.vue";
 import Rents from "../components/Rents.vue";
+import Rent_Payment from "../components/Rent_Payment.vue";
 import Prueba from "../components/Prueba.vue";
 import Apexcharts from "../components/Apexcharts.vue";
 import Error from "../views/Error.vue";
@@ -63,7 +64,12 @@ const routes = [
     component: Apexcharts,
     
   },
-
+  {
+    path: "/rent/:id",
+    name: "Rent_Payment",
+    component: Rent_Payment,
+    
+  },
   { path: '*', component: Error }
   // {
   //   path: '/property/new',
@@ -86,6 +92,7 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (store.state.user) {
+      console.log(store.state.user);
       next();
     } else {
       next({ name: "Login" });

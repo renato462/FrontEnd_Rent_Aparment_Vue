@@ -43,7 +43,7 @@ export default new Vuex.Store({
       } else {
         commit("setToken", token);
         commit("setUser", decode(token));
-        router.push("/properties");
+        // router.push("/properties");
       }
     },
 

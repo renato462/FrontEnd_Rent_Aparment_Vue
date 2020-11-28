@@ -212,8 +212,12 @@
       </template>
 
       <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
-        <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+         <router-link :to="`/rent/${item._id}`">
+        <v-icon small class="mr-2" > mdi-eye-outline</v-icon> 
+      </router-link>
+        
+        <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil-outline </v-icon>
+        <!-- <v-icon small @click="deleteItem(item)"> mdi-delete-outline </v-icon> -->
       </template>
 
       <template v-slot:no-data> </template>
@@ -355,14 +359,6 @@ export default {
   },
 
   methods: {
-    // diffMonths(){
-    //   if(this.editedItem.startDate&&this.editedItem.endDate) {
-    //     let date1 = moment(this.editedItem.startDate);
-    //     let date2 = moment(this.this.editedItem.endDate);
-    //     return this.editedItem.contractMonths = date2.diff(date1,"months");
-    //   }
-    //   return null;
-    // },
     
     headerRequests() {
       this.config = { headers: { "x-token": this.$store.state.token } };
@@ -381,12 +377,12 @@ export default {
         });
     },
     getAparments() {
-      const api = "aparments";
+      const api = "aparmentsFilter";
       let itemsArray;
       Vue.axios
         .get(api, this.config)
         .then((response) => {
-          this.aparments = response.data.aparments;
+          this.aparments = response.data.aparmentsArray;
         })
         .catch((error) => {
           console.log(error);
@@ -400,7 +396,7 @@ export default {
         .get(api, this.config)
         .then((response) => {
           this.loading = false;
-
+          this.getAparments();
           // Se debe cambiar en cada iteración
           this.items = response.data.rents;
           
@@ -421,6 +417,7 @@ export default {
 
       item.endDate = new Date(item.endDate);
       item.startDate = new Date(item.startDate);
+      console.log(item);
       this.editedItem = { ...item };
       this.dialog = true;
     },
@@ -429,7 +426,7 @@ export default {
       this.editedIndex = this.items.indexOf(item);
       // console.log(this.editedIndex);
       this.editedItem = { ...item };
-      // console.log(this.editedItem);
+     // console.log(this.editedItem);
       this.dialogDelete = true;
     },
 
@@ -466,6 +463,7 @@ export default {
     },
 
     save() {
+      
       if (!this.$refs.form.validate()) {
         this.$refs.form.validate();
       } else {
@@ -480,6 +478,7 @@ export default {
           .put(api, { ...this.editedItem }, this.config)
           .then((response) => {
             this.getItems();
+            this.getAparments();
           })
           .catch((error) => {
             console.log(error);
