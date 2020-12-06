@@ -35,7 +35,7 @@ export default new Vuex.Store({
       // TODO: Revisar el error cuando se reenvía.
 
       let token = localStorage.getItem("token");
-      
+      // console.log(token);
       if (decode(token).exp < new Date().getTime() / 1000) {
 
         this.dispatch("logout");
@@ -44,6 +44,16 @@ export default new Vuex.Store({
         commit("setToken", token);
         commit("setUser", decode(token));
         // router.push("/properties");
+      }
+    },
+
+    isTokenExpired ({ commit }){
+      let token = localStorage.getItem("token");
+      // console.log(token);
+      if (decode(token).exp < new Date().getTime() / 1000) {
+
+        this.dispatch("logout");
+   
       }
     },
 

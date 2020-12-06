@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Login from "../views/Login.vue";
 import Properties from "../components/Properties.vue";
+import Dashboard from "../components/Dashboard.vue";
 import Aparments from "../components/Aparments.vue";
 import Clients from "../components/Clients.vue";
 import Rents from "../components/Rents.vue";
@@ -10,6 +11,7 @@ import Prueba from "../components/Prueba.vue";
 import Apexcharts from "../components/Apexcharts.vue";
 import Error from "../views/Error.vue";
 import store from "../store/index";
+import { mapState, mapMutations, mapActions } from "vuex";
 
 Vue.use(VueRouter);
 
@@ -44,12 +46,18 @@ const routes = [
     path: "/clients",
     name: "Client",
     component: Clients,
+    meta: {
+      requiresAuth: true,
+    },
     
   },
   {
     path: "/rents",
     name: "Rent",
     component: Rents,
+    meta: {
+      requiresAuth: true,
+    },
     
   },
   {
@@ -68,6 +76,17 @@ const routes = [
     path: "/rent/:id",
     name: "Rent_Payment",
     component: Rent_Payment,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    component: Dashboard,
+    meta: {
+      requiresAuth: true,
+    },
     
   },
   { path: '*', component: Error }
@@ -92,7 +111,7 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (store.state.user) {
-      console.log(store.state.user);
+      store.dispatch("isTokenExpired");
       next();
     } else {
       next({ name: "Login" });

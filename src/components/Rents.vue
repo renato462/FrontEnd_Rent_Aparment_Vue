@@ -55,7 +55,6 @@
                 <v-card-text>
                   <v-container>
                     <v-row>
-                   
                       <v-col cols="12" sm="12" md="12">
                         <v-autocomplete
                           v-model="editedItem.clientId"
@@ -65,6 +64,7 @@
                           :rules="editedItemRules.clientId"
                           label="Cliente"
                           required
+                          @click="getAparments"
                           return-object
                         ></v-autocomplete>
                       </v-col>
@@ -123,9 +123,7 @@
                         ></v-text-field>
                       </v-col>
 
-
                       <v-col cols="4" sm="12" md="4">
-                       
                         <v-select
                           v-model="editedItem.status"
                           :items="itemsStatus"
@@ -191,32 +189,50 @@
       </template>
 
       <template v-slot:item.status="{ item }">
-        <v-chip v-if= "item.status == 'Pendiente'" class="ma-2" color="black" text-color="white">
+        <v-chip
+          v-if="item.status == 'Contrato Cerrado'"
+          class="ma-2"
+          color="black"
+          text-color="white"
+        >
           <v-avatar left>
             <v-icon>pending</v-icon>
           </v-avatar>
-          {{item.status}}
+          {{ item.status }}
         </v-chip>
-        <v-chip v-if= "item.status == 'Deuda'" class="ma-2" color="red" text-color="white"  @click="deleteItem(item)" >
+        <v-chip
+          v-if="item.status == 'Deuda'"
+          class="ma-2"
+          color="red"
+          text-color="white"
+          @click="deleteItem(item)"
+        >
           <v-avatar left>
             <v-icon>report_problem</v-icon>
           </v-avatar>
-          {{item.status}}
+          {{ item.status }}
         </v-chip>
-           <v-chip v-if= "item.status == 'Pagado'" class="ma-2" color="green" text-color="white">
+        <v-chip
+          v-if="item.status == 'Contrato Vigente'"
+          class="ma-2"
+          color="green"
+          text-color="white"
+        >
           <v-avatar left>
             <v-icon>check_circle</v-icon>
           </v-avatar>
-          {{item.status}}
+          {{ item.status }}
         </v-chip>
       </template>
 
       <template v-slot:item.actions="{ item }">
-         <router-link :to="`/rent/${item._id}`">
-        <v-icon small class="mr-2" > mdi-eye-outline</v-icon> 
-      </router-link>
-        
-        <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil-outline </v-icon>
+        <router-link :to="`/rent/${item._id}`">
+          <v-icon small class="mr-2"> mdi-eye-outline</v-icon>
+        </router-link>
+
+        <v-icon small class="mr-2" @click="editItem(item)">
+          mdi-pencil-outline
+        </v-icon>
         <!-- <v-icon small @click="deleteItem(item)"> mdi-delete-outline </v-icon> -->
       </template>
 
@@ -224,10 +240,7 @@
     </v-data-table>
 
     <div class="text-center pt-2">
-      <v-pagination
-        v-model="page"
-        :length="pageCount"
-      ></v-pagination>
+      <v-pagination v-model="page" :length="pageCount"></v-pagination>
     </div>
   </div>
 </template>
@@ -286,7 +299,7 @@ export default {
 
     clients: [],
     aparments: [],
-    itemsStatus: ["Pendiente", "Deuda", "Pagado"],
+    itemsStatus: ["Contrato Cerrado", "Deuda", "Contrato Vigente"],
     items: [],
     editedIndex: -1,
     editedItem: {
@@ -333,14 +346,14 @@ export default {
       return this.editedIndex === -1
         ? "Nueva " + this.title2
         : "Editar " + this.title2;
-    }, 
-    diffMonths(){
-      
-      if(this.editedItem.startDate&&this.editedItem.endDate) {
+    },
+    diffMonths() {
+      if (this.editedItem.startDate && this.editedItem.endDate) {
         let date1 = moment(this.editedItem.startDate);
         let date2 = moment(this.editedItem.endDate);
-        return this.editedItem.contractMonths = date2.diff(date1,"months");
-      }return null;
+        return (this.editedItem.contractMonths = date2.diff(date1, "months"));
+      }
+      return null;
     },
   },
   watch: {
@@ -359,7 +372,6 @@ export default {
   },
 
   methods: {
-    
     headerRequests() {
       this.config = { headers: { "x-token": this.$store.state.token } };
     },
@@ -399,7 +411,7 @@ export default {
           this.getAparments();
           // Se debe cambiar en cada iteración
           this.items = response.data.rents;
-          
+
           // Agregar Index para la Tabla
           let i = 0;
           for (const item of this.items) {
@@ -426,7 +438,7 @@ export default {
       this.editedIndex = this.items.indexOf(item);
       // console.log(this.editedIndex);
       this.editedItem = { ...item };
-     // console.log(this.editedItem);
+      // console.log(this.editedItem);
       this.dialogDelete = true;
     },
 
@@ -463,7 +475,6 @@ export default {
     },
 
     save() {
-      
       if (!this.$refs.form.validate()) {
         this.$refs.form.validate();
       } else {

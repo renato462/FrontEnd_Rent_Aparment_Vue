@@ -204,7 +204,7 @@ import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
 import GoogleLogin from "vue-google-login";
-import { LoaderPlugin } from "vue-google-login";
+import { LoaderPlugin } from "vue-google-login"; 
 import {
   required,
   maxLength,
@@ -285,7 +285,7 @@ export default {
         })
         .then((data) => {
           this.$store.dispatch("saveToken", data.token);
-          this.$router.push("/properties");
+          this.$router.push("/dashboard");
         })
         .catch((error) => {
           if (error.response.data.msg) {
@@ -305,7 +305,7 @@ export default {
         })
         .then((data) => {
           this.$store.dispatch("saveToken", data.token);
-          this.$router.push("/properties");
+          this.$router.push("/dashboard");
         })
         .catch((error) => {
           if (error.response.data.msg) {
@@ -325,7 +325,7 @@ export default {
         })
         .then((data) => {
           this.$store.dispatch("saveToken", data.token);
-          this.$router.push("/properties");
+          this.$router.push("/dashboard");
         })
         .catch((error) => {
           if (error.response.data.msg) {
